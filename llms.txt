@@ -1,0 +1,64 @@
+# repo-memory
+
+> Shared, git-tracked working memory for AI agents (Claude Code, Cursor, Cline, any) that operate on the same codebase. What one agent learns about a repo, the next one picks up automatically. No DB, no SaaS — just files in your repo.
+
+## Install
+```
+pip install repo-memory
+# or
+uvx repo-memory --help
+```
+
+Python ≥3.10. Depends only on the official `mcp` SDK.
+
+## How it works
+A `.ai-memory/` directory committed to your repo:
+- `facts.jsonl` — append-only structured facts with evidence
+- `decisions/*.md` — one markdown per non-trivial decision
+- `gotchas.md` — one-line "watch out for X" notes
+
+Git is the sync layer. No service to host.
+
+## For AI agents
+
+### CLI
+```bash
+repo-memory init                         # bootstrap .ai-memory/
+repo-memory show                         # render entire memory as Markdown
+repo-memory add-fact "<claim>" --file X --lines 42-50 --tool grep
+repo-memory add-decision "<title>" --body "..."
+repo-memory add-gotcha "<note>"
+repo-memory list-facts --tag auth
+```
+
+### MCP server (Claude Desktop / Cursor / Cline)
+
+```json
+{
+  "mcpServers": {
+    "repo-memory": {
+      "command": "uvx",
+      "args": ["repo-memory-mcp", "--repo", "/abs/path/to/the/repo"]
+    }
+  }
+}
+```
+
+Exposes 5 tools:
+- `get_repo_memory(fact_limit=50)` — render entire memory as Markdown. Call at the START of any task.
+- `add_fact(claim, file?, lines?, tool?, command?, tags?)` — record a verified fact.
+- `list_facts(tag?, source_file?, since?, limit?)` — filtered query.
+- `add_decision(title, body)` — record a non-trivial choice as a markdown file.
+- `add_gotcha(note)` — append a one-line surprise.
+
+## Recommended agent workflow
+1. Call `get_repo_memory` first → absorb prior facts/decisions.
+2. Do your task; for each verified non-obvious fact, call `add_fact` with evidence.
+3. For non-trivial decisions, call `add_decision`.
+4. Human commits `.ai-memory/` — synced to teammates via git.
+
+## Why git, not a database
+- Zero infra. Works offline.
+- Git history = audit trail (which agent added which fact when).
+- PR review filters wrong/stale facts.
+- Per-repo scope: a fact about repo A never leaks to repo B.
