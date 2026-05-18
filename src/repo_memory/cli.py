@@ -30,6 +30,8 @@ def main(argv: list[str] | None = None) -> int:
 
     p_init = sub.add_parser("init", help="Bootstrap .ai-memory/ in this repo.")
     _add_root_arg(p_init)
+    p_init.add_argument("--no-claude-md", action="store_true",
+                        help="Skip auto-adding the repo-memory section to CLAUDE.md / AGENTS.md.")
 
     p_show = sub.add_parser("show", help="Render the entire memory as Markdown.")
     _add_root_arg(p_show)
@@ -69,8 +71,13 @@ def main(argv: list[str] | None = None) -> int:
     root = args.root.resolve()
 
     if args.cmd == "init":
-        path = store.init(root)
+        path = store.init(root, update_claude_md=not args.no_claude_md)
         print(f"✓ initialised {path}")
+        if not args.no_claude_md:
+            cmd_path = root / "CLAUDE.md"
+            agents_path = root / "AGENTS.md"
+            updated = agents_path if agents_path.exists() and store.SECTION_BEGIN in agents_path.read_text(encoding="utf-8") else cmd_path
+            print(f"  + ensured discoverability section in {updated.relative_to(root) if updated.exists() else updated.name}")
         return 0
 
     if args.cmd == "show":

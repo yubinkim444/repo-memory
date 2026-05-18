@@ -24,6 +24,26 @@ DECISIONS_DIR = "decisions"
 GOTCHAS_FILE = "gotchas.md"
 README_FILE = "README.md"
 
+CLAUDE_MD_NAMES = ("CLAUDE.md", "AGENTS.md")  # update whichever exists; create CLAUDE.md by default
+SECTION_BEGIN = "<!-- BEGIN: repo-memory -->"
+SECTION_END = "<!-- END: repo-memory -->"
+CLAUDE_MD_SECTION = f"""\
+{SECTION_BEGIN}
+## Shared AI Memory (`.ai-memory/`)
+
+Before starting any non-trivial task in this repo, check:
+- `.ai-memory/facts.jsonl` — verified facts about this codebase
+- `.ai-memory/decisions/` — markdown decision records (why we did X)
+- `.ai-memory/gotchas.md` — known traps and surprises
+
+When you verify a non-obvious fact, make a non-trivial decision, or hit a
+gotcha, record it via `repo-memory add-fact / add-decision / add-gotcha`
+(or the matching MCP tool) so the next session/agent doesn't redo the work.
+
+Tool: https://github.com/yubinkim444/repo-memory
+{SECTION_END}
+"""
+
 README_TEMPLATE = """# .ai-memory/
 
 > Shared, git-tracked working memory for AI agents (Claude Code, Cursor,
@@ -107,9 +127,14 @@ def is_initialized(root: Path) -> bool:
     return _memdir(root).is_dir()
 
 
-def init(root: Path) -> Path:
+def init(root: Path, *, update_claude_md: bool = True) -> Path:
     """Bootstrap `<root>/.ai-memory/` with the standard layout.
-    Idempotent — re-running won't clobber existing files."""
+
+    If `update_claude_md` is True (default), also adds a discoverability
+    section to the repo's CLAUDE.md (or AGENTS.md if it exists instead),
+    creating CLAUDE.md if neither exists. Idempotent — re-running won't
+    clobber or duplicate anything.
+    """
     base = _memdir(root)
     base.mkdir(parents=True, exist_ok=True)
     (base / DECISIONS_DIR).mkdir(exist_ok=True)
@@ -122,7 +147,32 @@ def init(root: Path) -> Path:
     gotchas = base / GOTCHAS_FILE
     if not gotchas.exists():
         gotchas.write_text("# Gotchas\n\n_Append short notes about non-obvious traps._\n", encoding="utf-8")
+
+    if update_claude_md:
+        ensure_claude_md_section(root)
+
     return base
+
+
+def ensure_claude_md_section(root: Path) -> Path | None:
+    """Append the repo-memory discoverability section to CLAUDE.md (or
+    AGENTS.md if that exists instead). Idempotent. Returns the touched
+    path, or None if the section was already present."""
+    target: Path | None = None
+    for name in CLAUDE_MD_NAMES:
+        candidate = root / name
+        if candidate.exists():
+            target = candidate
+            break
+    if target is None:
+        target = root / CLAUDE_MD_NAMES[0]  # create CLAUDE.md by default
+
+    existing = target.read_text(encoding="utf-8") if target.exists() else ""
+    if SECTION_BEGIN in existing and SECTION_END in existing:
+        return None
+    prefix = existing.rstrip() + "\n\n" if existing.strip() else ""
+    target.write_text(prefix + CLAUDE_MD_SECTION, encoding="utf-8")
+    return target
 
 
 def add_fact(root: Path, claim: str, evidence: dict | None = None,

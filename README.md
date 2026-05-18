@@ -63,7 +63,7 @@ Python ≥3.10. Depends only on the official `mcp` SDK (for the MCP server).
 
 ```bash
 cd your-repo
-repo-memory init                              # creates .ai-memory/
+repo-memory init                              # creates .ai-memory/ + adds CLAUDE.md hint
 repo-memory add-fact "Auth middleware lives in src/auth/middleware.py" \
                      --file src/auth/middleware.py --lines 42-180 --tool grep
 repo-memory add-decision "Use httpx not requests" \
@@ -180,11 +180,26 @@ re-verify if they want.
 
 ---
 
+## Automatic discovery hint
+
+`repo-memory init` also appends a short discoverability section to your
+repo's `CLAUDE.md` (or `AGENTS.md` if you already have one) telling any
+AI agent that enters the repo to check `.ai-memory/` first and to record
+new findings back into it. Idempotent — re-running won't duplicate.
+
+Opt out with `--no-claude-md`.
+
+The appended block is delimited by `<!-- BEGIN: repo-memory -->` and
+`<!-- END: repo-memory -->`, so you can hand-edit other parts of your
+`CLAUDE.md` freely.
+
+---
+
 ## CLI reference
 
 | Command | Effect |
 |---------|--------|
-| `repo-memory init` | Create `.ai-memory/` skeleton. |
+| `repo-memory init [--no-claude-md]` | Create `.ai-memory/` skeleton + (default) update CLAUDE.md/AGENTS.md. |
 | `repo-memory show [--limit N]` | Print everything as one Markdown doc. |
 | `repo-memory add-fact "<claim>" [--file F --lines L --tool T --command C --tag T --by AGENT]` | Append a fact. |
 | `repo-memory list-facts [--tag T] [--source-file F] [--since ISO] [--limit N] [--json]` | List/filter facts. |
