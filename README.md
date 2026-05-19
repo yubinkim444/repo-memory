@@ -1,3 +1,7 @@
+<!--
+mcp-name: io.github.yubinkim444/repo-memory
+-->
+
 # repo-memory
 
 > **Shared, git-tracked working memory for AI agents that share a codebase.**
