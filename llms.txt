@@ -4,9 +4,9 @@
 
 ## Install
 ```
-pip install repo-memory
+pip install repo-memory-mcp
 # or
-uvx repo-memory --help
+uvx repo-memory-mcp --help
 ```
 
 Python ≥3.10. Depends only on the official `mcp` SDK.

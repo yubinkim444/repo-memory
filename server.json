@@ -12,7 +12,7 @@
     {
       "registryType": "pypi",
       "registryBaseUrl": "https://pypi.org",
-      "identifier": "repo-memory",
+      "identifier": "repo-memory-mcp",
       "version": "0.2.0",
       "runtimeHint": "uvx",
       "transport": {

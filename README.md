@@ -8,7 +8,7 @@ mcp-name: io.github.yubinkim444/repo-memory
 > What one Claude / Cursor / Cline learns about your repo, the next one
 > picks up automatically. No database. No SaaS. Just files in your repo.
 
-[![PyPI](https://img.shields.io/pypi/v/repo-memory)](https://pypi.org/project/repo-memory/)
+[![PyPI](https://img.shields.io/pypi/v/repo-memory-mcp)](https://pypi.org/project/repo-memory-mcp/)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)]()
 [![MCP](https://img.shields.io/badge/MCP-server-7c3aed)]()
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)]()
@@ -54,9 +54,9 @@ Pure files. Sync over git. No daemon, no DB, no auth. Works offline.
 ## Install
 
 ```bash
-pip install repo-memory
+pip install repo-memory-mcp
 # or
-uvx repo-memory --help
+uvx repo-memory-mcp --help
 ```
 
 Python ≥3.10. Depends only on the official `mcp` SDK (for the MCP server).

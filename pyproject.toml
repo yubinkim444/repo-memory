@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "repo-memory"
+name = "repo-memory-mcp"
 version = "0.2.0"
 description = "Shared, git-tracked memory for AI agents (Claude Code, Cursor, Cline) working on the same codebase. CLI + MCP server."
 readme = "README.md"
